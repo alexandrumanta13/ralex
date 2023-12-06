@@ -3,7 +3,7 @@
   "builds": [
     {
       "src": "ralex.js",
-      "use": "@now/node"
+      "use": "@vercel/node"
     }
   ],
   "routes": [
