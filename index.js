@@ -38,7 +38,15 @@ async function fetchData(req, res) {
 }
 
 async function scrollAndFetchProducts(url) {
-  const browser = await puppeteer.launch({ headless: true });
+  const browser = await puppeteer.launch({
+    headless: true,
+    PUPPETEER_DISABLE_HEADLESS_WARNING: true,
+    args: [
+      "--no-sandbox",
+      "--disable-setuid-sandbox",
+      "--PUPPETEER_DISABLE_HEADLESS_WARNING",
+    ],
+  });
   const page = await browser.newPage();
   await page.goto(url);
 
