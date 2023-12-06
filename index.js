@@ -8,16 +8,16 @@ const cors = require("cors");
 const app = express();
 const port = process.env.PORT || 3000;
 
-const serverOptions = {
-  key: fs.readFileSync("./private-key.pem"),
-  cert: fs.readFileSync("./certificate.pem"),
-};
+// const serverOptions = {
+//   key: fs.readFileSync("./private-key.pem"),
+//   cert: fs.readFileSync("./certificate.pem"),
+// };
 
-const server = https.createServer(serverOptions, app);
+// const server = https.createServer(serverOptions, app);
 
-server.listen(port, () => {
-  console.log(`Server is running on https://localhost:${port}`);
-});
+// server.listen(port, () => {
+//   console.log(`Server is running on https://localhost:${port}`);
+// });
 
 app.use(cors());
 
