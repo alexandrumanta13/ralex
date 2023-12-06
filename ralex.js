@@ -108,3 +108,6 @@ async function saveProductsToLumen(products) {
     }
   }
 }
+
+// Export the Express API
+module.exports = app;
