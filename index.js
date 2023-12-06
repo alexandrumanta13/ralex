@@ -19,6 +19,16 @@ const port = process.env.PORT || 3000;
 //   console.log(`Server is running on https://localhost:${port}`);
 // });
 
+let chrome = {};
+let puppeteer;
+
+if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+  chrome = require("chrome-aws-lambda");
+  puppeteer = require("puppeteer-core");
+} else {
+  puppeteer = require("puppeteer");
+}
+
 app.use(cors());
 
 app.get("/", fetchData);
@@ -38,7 +48,18 @@ async function fetchData(req, res) {
 }
 
 async function scrollAndFetchProducts(url) {
-  const browser = await puppeteer.launch({ headless: "new" });
+  let options = {};
+
+  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
+    options = {
+      args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
+      defaultViewport: chrome.defaultViewport,
+      executablePath: await chrome.executablePath,
+      headless: true,
+      ignoreHTTPSErrors: true,
+    };
+  }
+  const browser = await puppeteer.launch(options);
   const page = await browser.newPage();
   await page.goto(url);
 
