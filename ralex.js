@@ -1,5 +1,41 @@
+const express = require("express");
 const puppeteer = require("puppeteer");
 const axios = require("axios");
+const https = require("https");
+const fs = require("fs");
+const cors = require("cors");
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+const serverOptions = {
+  key: fs.readFileSync("./private-key.pem"),
+  cert: fs.readFileSync("./certificate.pem"),
+};
+
+const server = https.createServer(serverOptions, app);
+
+server.listen(port, () => {
+  console.log(`Server is running on https://localhost:${port}`);
+});
+
+app.use(cors());
+
+app.get("/", fetchData);
+
+async function fetchData(req, res) {
+  try {
+    const websiteUrl =
+      "https://ralexpucioasa.ro/categorie-produs/lenjerii-de-pat/";
+    const result = await scrollAndFetchProducts(websiteUrl);
+
+    console.log("Product Data:", result.products);
+    res.send(result.products); // Sending products as the response
+  } catch (error) {
+    console.error(error);
+    res.status(500).send("Internal Server Error");
+  }
+}
 
 async function scrollAndFetchProducts(url) {
   const browser = await puppeteer.launch();
@@ -25,10 +61,8 @@ async function scrollAndFetchProducts(url) {
     currentProductCount = productElements.length;
 
     if (currentProductCount > prevProductCount) {
-      // Extract and append newly loaded products
-      const newProducts = productElements
-        .slice(prevProductCount)
-        .map(async (element) => {
+      const newProducts = await Promise.all(
+        productElements.slice(prevProductCount).map(async (element) => {
           return await page.evaluate((el) => {
             const name = el.querySelector(
               ".woocommerce-loop-product__title"
@@ -48,17 +82,10 @@ async function scrollAndFetchProducts(url) {
 
             return { name, price, link, stock_status, sku, id, image };
           }, element);
-        });
+        })
+      );
 
-      //   productData = [...productData, ...(await Promise.all(newProducts))];
-      //   await axios.post(
-      //     "https://comenzi.fabricadeasternuturi.ro/api/v2/products/ralex",
-      //     { productData }
-      //   );
-      const products = await Promise.all(newProducts);
-
-      // Save products to your Lumen server
-      await saveProductsToLumen(products);
+      productData.push(...newProducts);
     }
   } while (currentProductCount > prevProductCount);
 
@@ -66,17 +93,6 @@ async function scrollAndFetchProducts(url) {
 
   return { totalProducts: productData.length, products: productData };
 }
-
-// Example usage:
-const websiteUrl = "https://ralexpucioasa.ro/categorie-produs/lenjerii-de-pat/";
-scrollAndFetchProducts(websiteUrl)
-  .then((result) => {
-    // console.log("Total Products:", result.totalProducts);
-    console.log("Product Data:", result.products);
-  })
-  .catch((error) => {
-    console.error(error);
-  });
 
 async function saveProductsToLumen(products) {
   try {
