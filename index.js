@@ -13,7 +13,7 @@ const serverOptions = {
   cert: fs.readFileSync("certificate.pem"),
 };
 
-const server = https.createServer(serverOptions, app);
+const server = https.createServer(app);
 
 server.listen(port, () => {
   console.log(`Server is running on https://localhost:${port}`);
