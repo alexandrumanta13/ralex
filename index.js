@@ -1,4 +1,5 @@
 const express = require("express");
+const puppeteer = require("puppeteer");
 const axios = require("axios");
 const https = require("https");
 const fs = require("fs");
@@ -17,16 +18,6 @@ const port = process.env.PORT || 3000;
 // server.listen(port, () => {
 //   console.log(`Server is running on https://localhost:${port}`);
 // });
-
-let chrome = {};
-let puppeteer;
-
-if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-  chrome = require("chrome-aws-lambda");
-  puppeteer = require("puppeteer-core");
-} else {
-  puppeteer = require("puppeteer");
-}
 
 app.use(cors());
 
@@ -47,18 +38,7 @@ async function fetchData(req, res) {
 }
 
 async function scrollAndFetchProducts(url) {
-  let options = {};
-
-  if (process.env.AWS_LAMBDA_FUNCTION_VERSION) {
-    options = {
-      args: [...chrome.args, "--hide-scrollbars", "--disable-web-security"],
-      defaultViewport: chrome.defaultViewport,
-      executablePath: await chrome.executablePath,
-      headless: true,
-      ignoreHTTPSErrors: true,
-    };
-  }
-  const browser = await puppeteer.launch(options);
+  const browser = await puppeteer.launch();
   const page = await browser.newPage();
   await page.goto(url);
 
