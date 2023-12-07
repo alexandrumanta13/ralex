@@ -8,6 +8,6 @@
     "puppeteer-core": "^21.6.0"
   },
   "scripts": {
-    "heroku-postbuild": "mkdir ./.cache && mv /app/.cache/puppeteer ./.cache"
+    "heroku-postbuild": "bash postbuild.bash"
   }
 }
